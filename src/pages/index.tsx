@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Layout from '../components/Layout';
 import Image from 'next/image'
-import { useTheme } from '@storybook/theming'
 
 interface Game {
   id: number;
@@ -31,8 +30,6 @@ const Home = () => {
   queryRef.current = query;
 
   const cache = useRef(new Map());
-
-  const { theme } = useTheme(); // Use the theme from the context
 
   const fetchGames = useCallback(async (searchQuery: string, pageNumber: number) => {
     // Check cache first
