@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "https://jedemarco1030.github.io/game-search",
   "scripts": {
-    "build": "next build",
+    "build": "gh-pages next build",
     "build-storybook": "storybook build",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
