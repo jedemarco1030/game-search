@@ -1,7 +1,7 @@
 // components/Layout.tsx
 import React, { ReactNode } from 'react';
-import Header from './Header';
-import Footer from './Footer';
+import Header from '../Header/Header';
+import Footer from '../Footer/Footer';
 
 type LayoutProps = {
   children: ReactNode; // Define the type for children here

@@ -1,7 +1,7 @@
 // src/pages/index.tsx
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import Layout from '../components/Layout';
-import Image from 'next/image'
+import Layout from '@/components/Layout/Layout';
+import GameCard from '@/components/GameCard/GameCard'
 
 interface Game {
   id: number;
@@ -25,6 +25,19 @@ const Home = () => {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [favorites, setFavorites] = useState<Game[]>([]);
+
+  const toggleFavorite = (game: Game) => {
+    const isFavorite = favorites.some(favorite => favorite.id === game.id);
+    const updatedFavorites = isFavorite
+      ? favorites.filter(favorite => favorite.id !== game.id)
+      : [...favorites, game];
+
+    setFavorites(updatedFavorites);
+    // Safe to call localStorage here since this code runs in response to a user action/event
+    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+  };
+
 
   const queryRef = useRef(query);
   queryRef.current = query;
@@ -32,7 +45,6 @@ const Home = () => {
   const cache = useRef(new Map());
 
   const fetchGames = useCallback(async (searchQuery: string, pageNumber: number) => {
-    // Check cache first
     const cacheKey = `${searchQuery}-${pageNumber}`;
     const cachedResults = cache.current.get(cacheKey);
     if (cachedResults) {
@@ -41,7 +53,7 @@ const Home = () => {
     }
     setLoading(true);
     try {
-      const response = await fetch(`https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&search=${searchQuery}&page_size=100&page=${pageNumber}`);
+      const response = await fetch(`https://api.rawg.io/api/games?key=${process.env.NEXT_PUBLIC_RAWG_API_KEY}&search=${searchQuery}&page_size=10&page=${pageNumber}`);
       const data = await response.json();
       // After fetching, cache the results
       cache.current.set(searchQuery, data.results);
@@ -80,13 +92,39 @@ const Home = () => {
       }
     }, 500);
 
+    const savedFavorites = localStorage.getItem('favorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+
     return () => clearTimeout(timerId);
   }, [query, fetchGames]);
 
 
   return (
     <Layout>
-      <div className="container mx-auto px-4">
+      <div className="mx-auto px-4 w-full max-w-screen-md">
+        <div className="mx-auto px-4 py-8 w-full max-w-screen-md">
+          <h1 className="text-3xl font-bold text-center mb-4">Welcome to Game Search</h1>
+          <p className="text-lg text-center mb-4">
+            Explore a vast collection of video games.
+          </p>
+          <p className="text-lg text-center mb-4">
+            Use the input field below to search for games by name.
+          </p>
+          <p className="text-lg text-center mb-4">
+            Can&apos;t find what you&apos;re looking for?
+          </p>
+          <p className="text-lg text-center mb-4">
+            Click the <strong>&quot;Load More&quot;</strong> button to discover more games.
+          </p>
+          <p className="text-lg text-center">
+            Dive deeper into your gaming adventure by adding games to your <strong>Favorites</strong>.
+          </p>
+          <p className="text-lg text-center">
+            You can easily <strong>Add</strong> or <strong>Remove</strong> games from your favorites list for each game.
+          </p>
+        </div>
         <div className="search-bar my-4">
           <input
             type="text"
@@ -97,49 +135,37 @@ const Home = () => {
           />
         </div>
 
+        {!loading && games.length === 0 && query.length > 0 && (
+          <div className="text-center my-4">No game results found for &quot;{query}&quot;. Try a different search.</div>
+        )}
+
         {/* Error Message Display */}
         {error && <div className="my-4 text-center text-red-500">{error}</div>}
 
         {/* Conditional rendering: if there's no error, show loading or results */}
         {!error && (
           <>
-          {loading && <div className="text-center my-4">Loading games...</div>}
+            {loading && <div className="text-center my-4">Loading games...</div>}
             <div className="games-list grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {games.map((game, index) => (
-                <div
-                  key={`${game.id}-${index}`}
-                  className="game-item flex flex-col p-4 border border-gray-200 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white"
-                >
-                  {game.background_image && (
-                    <div className="flex-shrink-0 relative w-full mb-2"
-                         style={{ paddingTop: '56.25%' }}> {/* This sets an aspect ratio */}
-                      <Image
-                        src={game.background_image}
-                        alt={game.name}
-                        layout="fill"
-                        objectFit="cover"
-                        className="rounded"
-                      />
-                    </div>
-                  )}
-                  <div className="flex flex-col flex-grow">
-                    <h3 className="text-lg font-bold">{game.name}</h3>
-                    <p className="text-sm">Released: {game.released}</p>
-                    <div className="text-sm mt-auto">
-                      Platforms: {game.platforms?.length > 0 ? game.platforms.map(p => p.platform.name).join(', ') : 'N/A'}
-                    </div>
-                  </div>
-                </div>
+              {games.map((game) => (
+                <GameCard
+                  key={game.id}
+                  game={game}
+                  toggleFavorite={toggleFavorite}
+                  isFavorite={(id) => favorites.some(favorite => favorite.id === id)}
+                />
               ))}
-              {hasMore && (
+            </div>
+            {hasMore && (
+              <div className="grid grid-cols-1">
                 <button
                   className="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                   onClick={() => fetchGames(query, page)}
                 >
                   Load More
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
       </div>
