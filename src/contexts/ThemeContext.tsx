@@ -1,41 +1,49 @@
-// contexts/ThemeContext.js
+'use client'
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import type { ReactNode } from 'react'
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark'
 type ThemeContextType = {
-  theme: Theme;
-  toggleTheme: () => void;
-};
+  theme: Theme
+  toggleTheme: () => void
+}
 
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(
+  undefined
+)
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
+  const context = useContext(ThemeContext)
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error('useTheme must be used within a ThemeProvider')
   }
-  return context;
-};
+  return context
+}
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>('light')
 
   useEffect(() => {
-    document.body.className = theme; // Apply the theme class to the body
-  }, [theme]);
+    document.body.className = theme
+  }, [theme])
 
   const toggleTheme = () => {
-    setTheme((prevTheme) => {
-      const newTheme = prevTheme === 'light' ? 'dark' : 'light';
-      console.log("Toggling theme to:", newTheme); // Verify theme toggle
-      return newTheme;
-    });
-  };
+    setTheme(prevTheme => {
+      const newTheme = prevTheme === 'light' ? 'dark' : 'light'
+      // eslint-disable-next-line no-console
+      console.log('Toggling theme to:', newTheme)
+      return newTheme
+    })
+  }
 
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
-};
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme])
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+}

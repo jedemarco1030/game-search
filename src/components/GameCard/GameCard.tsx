@@ -1,58 +1,69 @@
-import React from 'react';
-import Image from 'next/image';
+'use client'
 
-// Assuming Game and Platform types are defined elsewhere
+import Image from 'next/image'
+import React from 'react'
+
 interface Game {
-  id: number;
-  name: string;
-  released: string;
-  background_image: string;
-  platforms: Platform[];
+  id: number
+  name: string
+  released: string
+  background_image: string
+  platforms: Platform[]
 }
 
 interface Platform {
   platform: {
-    name: string;
-  };
+    name: string
+  }
 }
 
 export interface GameCardProps {
-  game: Game;
-  toggleFavorite: (game: Game) => void;
-  isFavorite: (id: number) => boolean;
+  game: Game
+  toggleFavorite: (game: Game) => void
+  isFavorite: (id: number) => boolean
 }
 
-const GameCard: React.FC<GameCardProps> = ({ game, toggleFavorite, isFavorite }) => {
+const GameCard: React.FC<GameCardProps> = ({
+  game,
+  toggleFavorite,
+  isFavorite,
+}) => {
   return (
-    <div
-      className="game-item flex flex-col p-4 border border-gray-200 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white"
-    >
+    <div className="flex flex-col rounded-md border border-gray-200 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-white">
       {game.background_image && (
-        <div className="flex-shrink-0 relative w-full mb-2" style={{ paddingTop: '56.25%' }}>
+        <div
+          className="relative mb-2 w-full shrink-0"
+          style={{ paddingTop: '56.25%' }}
+        >
           <Image
             src={game.background_image}
             alt={game.name}
-            fill={true}
+            fill
             className="rounded"
-            style={{objectFit: "cover"}}
+            style={{ objectFit: 'cover' }}
+            sizes="50vw"
           />
         </div>
       )}
-      <div className="flex flex-col flex-grow">
+      <div className="flex grow flex-col">
         <h3 className="text-lg font-bold">{game.name}</h3>
         <p className="text-sm">Released: {game.released}</p>
-        <div className="text-sm mt-auto">
-          Platforms: {game.platforms?.length > 0 ? game.platforms.map(p => p.platform.name).join(', ') : 'N/A'}
+        <div className="mt-auto text-sm">
+          Platforms:{' '}
+          {game.platforms?.length > 0
+            ? game.platforms.map(p => p.platform.name).join(', ')
+            : 'N/A'}
         </div>
         <button
           onClick={() => toggleFavorite(game)}
-          className="mt-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out"
+          className="mt-2 rounded bg-blue-500 px-4 py-2 font-bold text-white transition duration-300 ease-in-out hover:bg-blue-700"
+          type="button"
         >
           {isFavorite(game.id) ? 'Remove from Favorites' : 'Add to Favorites'}
         </button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default GameCard;
+export default GameCard

@@ -1,13 +1,15 @@
-// components/Footer.js
+'use client'
 
-function Footer() {
+const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white text-center p-4 mt-8">
+    <footer className="mt-8 bg-blue-500 p-4 text-center text-white">
       <div className="container mx-auto">
-        <p>&copy; {new Date().getFullYear()} Game Search. All rights reserved.</p>
+        <p>
+          &copy; {new Date().getFullYear()} Game Search. All rights reserved.
+        </p>
       </div>
     </footer>
-  );
+  )
 }
 
-export default Footer;
+export default Footer

@@ -1,69 +1,124 @@
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { useTheme } from '@/contexts/ThemeContext';
+'use client'
 
-function Header() {
-  const { toggleTheme } = useTheme();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+import Link from 'next/link'
+import React, { useEffect, useRef, useState } from 'react'
+import { FaBars, FaMoon, FaSun, FaTimes } from 'react-icons/fa'
 
-  // Handle clicks outside of the menu to close it
+import { useTheme } from '@/contexts/ThemeContext'
+
+const Header = () => {
+  const { theme, toggleTheme } = useTheme()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (!menuRef.current?.contains(event.target as Node)) {
-        setIsMenuOpen(false);
+        setIsMenuOpen(false)
       }
-    };
-
-    // Only add the event listener if the menu is open
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleOutsideClick);
     }
 
-    // Clean up by removing the event listener
-    return () => document.removeEventListener('mousedown', handleOutsideClick);
-  }, [isMenuOpen]);
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleOutsideClick)
+    }
 
-  // Function to close the menu, can be called when a menu item is clicked
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [isMenuOpen])
+
+  const handleKeyDown = (event: React.KeyboardEvent, href: string) => {
+    if (event.key === 'Enter') {
+      window.location.href = href
+    }
+  }
 
   return (
-    <header className="bg-blue-500 text-white p-4">
-      <div className="mx-auto w-full max-w-screen-md">
-        <div className="flex justify-between items-center flex-wrap">
-          <h1 className="text-lg flex-grow">Game Search</h1>
-          <div className="flex items-center">
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="bg-gray-200 text-gray-800 px-3 py-1 rounded mr-4 md:hidden"
-            >
-              Menu
-            </button>
-            <button onClick={toggleTheme} className="bg-gray-200 text-gray-800 px-3 py-1 rounded">
-              Toggle Theme
-            </button>
-          </div>
-        </div>
-        <div className={`mt-4 ${isMenuOpen ? 'block' : 'hidden'} md:block`} ref={menuRef}>
-          <nav>
-            <ul className="flex flex-col md:flex-row md:space-x-4">
-              <li onClick={closeMenu}>
-                <Link href="/">Home</Link>
-              </li>
-              <li onClick={closeMenu}>
-                <Link href="/favorites" className="hover:underline text-white">Favorites</Link>
-              </li>
-              <li onClick={closeMenu}>
-                <Link href="/about" className="hover:underline text-white">About</Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
+    <header className="relative flex items-center justify-between bg-blue-500 p-4 text-white">
+      <h1 className="text-lg font-semibold">Game Search</h1>
+      <div className="hidden items-center md:flex">
+        <nav className={`${isMenuOpen ? 'hidden' : 'flex'} space-x-4 md:flex`}>
+          <Link
+            href="/"
+            className="px-3 text-white hover:underline"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => handleKeyDown(e, '/')}
+          >
+            Home
+          </Link>
+          <Link
+            href="/favorites"
+            className="px-3 text-white hover:underline"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => handleKeyDown(e, '/favorites')}
+          >
+            Favorites
+          </Link>
+          <Link
+            href="/about"
+            className="px-3 text-white hover:underline"
+            role="button"
+            tabIndex={0}
+            onKeyDown={e => handleKeyDown(e, '/about')}
+          >
+            About
+          </Link>
+        </nav>
+        <button onClick={toggleTheme} className="mx-3" type="button">
+          {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
+        </button>
       </div>
+      <button
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        className="mx-3 md:hidden"
+        type="button"
+      >
+        {isMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+      </button>
+      {isMenuOpen && (
+        <div
+          className="absolute right-0 top-full z-10 w-full bg-blue-500 shadow-lg md:hidden"
+          ref={menuRef}
+        >
+          <nav className="flex flex-col items-start">
+            <Link
+              href="/"
+              className="block px-4 py-2 text-white hover:underline"
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => handleKeyDown(e, '/')}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link
+              href="/favorites"
+              className="block px-4 py-2 text-white hover:underline"
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => handleKeyDown(e, '/favorites')}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Favorites
+            </Link>
+            <Link
+              href="/about"
+              className="block px-4 py-2 text-white hover:underline"
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => handleKeyDown(e, '/about')}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              About
+            </Link>
+          </nav>
+          <button onClick={toggleTheme} className="m-3 p-1" type="button">
+            {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
+          </button>
+        </div>
+      )}
     </header>
-  );
+  )
 }
 
-export default Header;
+export default Header
